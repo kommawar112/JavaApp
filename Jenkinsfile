@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     environment {
-        // AWS ECR repository URL
+        
         ECR_REPOSITORY = 'vprofileapp'
-        AWS_REGION = 'us-east-1' // Change to your region
-        IMAGE_TAG = "${BUILD_NUMBER}"  // Use Jenkins build number as the tag
+        AWS_REGION = 'us-east-1' 
+        IMAGE_TAG = "${BUILD_NUMBER}"  // Using Jenkins build number as the tag
         IMAGE_LATEST_TAG = "latest"
         AWS_ACCOUNT_ID = '730335281764'
-        DOCKERFILE_DIR = './Docker-files/app/multistage'  // Directory where the Dockerfile is located
+        DOCKERFILE_DIR = './Docker-files/'  // Directory where the Dockerfile is located
         cluster = "javastaging"
         service = "javaappsvc"
     }
@@ -19,9 +19,9 @@ pipeline {
         stage('Login to AWS ECR') {
             steps {
                 script {
-                    // Use the stored AWS credentials from Jenkins Credentials Plugin
+                    // Using the stored AWS credentials from Jenkins Credentials Plugin
                     withAWS(credentials: 'awscreds'){
-                        // Authenticate to AWS ECR using the AWS CLI
+                        // Authenticating to AWS ECR using the AWS CLI
                         sh """
                             aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
                         """
@@ -49,7 +49,7 @@ pipeline {
         stage('Tag Docker Image') {
             steps {
                 script {
-                    // Tag the image for ECR
+                    // Tagging the image for ECR
                     sh "docker tag ${ECR_REPOSITORY}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_LATEST_TAG}"
                     //docker tag ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_LATEST_TAG}
                 }
@@ -59,7 +59,7 @@ pipeline {
         stage('Push Docker Image to ECR') {
             steps {
                 script {
-                    // Push the image to AWS ECR
+                    // Pushing the image to AWS ECR
                     sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_LATEST_TAG}"
                 }
             }
